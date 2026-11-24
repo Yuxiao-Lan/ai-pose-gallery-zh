@@ -30,3 +30,4 @@ img/costume/*.png
 img/portrait/*.png
 img/depth/*.png
 thumbs/depth/*.jpg
+dist-test/
