@@ -3,3 +3,4 @@ data/gia-anime/costume-anime.json -text
 data/shisei/costumes.json -text
 data/shisei/LICENSE-images -text
 data/shisei/NOTICE -text
+src/routeTree.gen.ts text eol=lf
