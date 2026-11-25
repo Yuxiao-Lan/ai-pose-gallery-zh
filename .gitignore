@@ -31,3 +31,7 @@ img/portrait/*.png
 img/depth/*.png
 thumbs/depth/*.jpg
 dist-test/
+dist-test.next/
+dist.next/
+dist.prev/
+.build.lock
