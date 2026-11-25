@@ -28,6 +28,10 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
 
   const topPortraits = series.allowRecipe ? portraits.filter((p) => p.热门).slice(0, 10) : []
   const totalImages = posesData.items.length + costumes.length + portraits.length
+  const realisticCostumes = costumes.filter((item) => (item.一级分类 || '现实') === '现实').length
+  const animeCostumes = costumes.length - realisticCostumes
+  const hairCount = new Set(portraits.map((item) => item.发型名称).filter(Boolean)).size
+  const posesHaveDepth = posesData.items.some((item) => item.hasDepth !== false && !item.缩略图.startsWith('thumbs/bears/'))
 
   return (
     <>
@@ -45,19 +49,19 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
           title="动作姿势 (Pose)"
           value={`${posesData.groups.length} 组`}
           icon={<PersonStandingIcon />}
-          desc={`${posesData.items.length} 张 · 白模/深度`}
+          desc={`${posesData.items.length} 张 · ${posesHaveDepth ? '白模/深度' : '本地参考图'}`}
         />
         <StatCard
           title="服装穿搭 (Costume)"
           value={`${costumes.length.toLocaleString('zh-CN')} 套`}
           icon={<ShirtIcon />}
-          desc="现实 1,407 · 二次元 440"
+          desc={series.showProvenance ? `现实 ${realisticCostumes} · 二次元 ${animeCostumes}` : '本地收录'}
         />
         <StatCard
           title="人像颜值 (Portrait)"
           value={`${portraits.length.toLocaleString('zh-CN')} 张`}
           icon={<UserRoundIcon />}
-          desc="CC0 协议 · 51 款发型"
+          desc={series.showProvenance ? `CC0 协议 · ${hairCount} 款发型` : `${hairCount} 款发型`}
         />
       </div>
 
@@ -70,7 +74,7 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">🕺 动作姿势库</h2>
-            <Badge variant="secondary">1,439</Badge>
+            <Badge variant="secondary">{posesData.items.length.toLocaleString('zh-CN')}</Badge>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">
             {posesData.groups.slice(0, 4).map((g) => (
@@ -114,7 +118,7 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">👤 人像颜值库</h2>
-            <Badge variant="secondary">1,499</Badge>
+            <Badge variant="secondary">{portraits.length.toLocaleString('zh-CN')}</Badge>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">
             {portraits.slice(0, 4).map((p) => (
