@@ -64,7 +64,7 @@ export const SERIES: Record<SeriesId, SeriesDef> = {
       poses: 'data/bears/pose-zh.json',
       costumes: ['data/bears/costume-zh.json'],
       portraits: 'data/bears/portrait-zh.json',
-      body: null,
+      body: 'data/bears/body-zh.json',
     },
     showProvenance: false,
   },

@@ -6,11 +6,12 @@ import {
   FlameIcon,
   LayersIcon,
   PersonStandingIcon,
+  RulerIcon,
   PlusIcon,
   ShirtIcon,
   UserRoundIcon,
 } from 'lucide-react'
-import { buildPoseGroups, costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
+import { bodyQueryFor, buildPoseGroups, costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
 import { isSensitive } from '@/lib/nsfw'
 import { PageHeader } from '@/components/common/PageHeader'
 import { StatCard } from '@/components/common/StatCard'
@@ -25,14 +26,16 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
   const { data: posesData } = useSuspenseQuery(posesQueryFor(series.id))
   const { data: costumes } = useSuspenseQuery(costumesQueryFor(series.id))
   const { data: portraits } = useSuspenseQuery(portraitsQueryFor(series.id))
+  const { data: bodyItems } = useSuspenseQuery(bodyQueryFor(series.id))
   const { recipe, togglePortrait, safeMode } = useStudio()
 
   const visiblePoses = safeMode ? posesData.items.filter((item) => !isSensitive(item)) : posesData.items
   const visibleGroups = safeMode ? buildPoseGroups(visiblePoses, series.angles).groups : posesData.groups
   const visibleCostumes = safeMode ? costumes.filter((item) => !isSensitive(item)) : costumes
   const visiblePortraits = safeMode ? portraits.filter((item) => !isSensitive(item)) : portraits
+  const visibleBody = safeMode ? bodyItems.filter((item) => !isSensitive(item)) : bodyItems
   const topPortraits = series.allowRecipe ? visiblePortraits.filter((p) => p.热门).slice(0, 10) : []
-  const totalImages = visiblePoses.length + visibleCostumes.length + visiblePortraits.length
+  const totalImages = visiblePoses.length + visibleCostumes.length + visiblePortraits.length + visibleBody.length
   const realisticCostumes = costumes.filter((item) => (item.一级分类 || '现实') === '现实').length
   const animeCostumes = costumes.length - realisticCostumes
   const hairCount = new Set(portraits.map((item) => item.发型名称).filter(Boolean)).size
@@ -68,10 +71,18 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
           icon={<UserRoundIcon />}
           desc={series.showProvenance ? `CC0 协议 · ${hairCount} 款发型` : `${hairCount} 款发型`}
         />
+        {series.libraries.body && (
+          <StatCard
+            title="身材参考 (Body)"
+            value={`${visibleBody.length.toLocaleString('zh-CN')} 张`}
+            icon={<RulerIcon />}
+            desc="体型与视角参考"
+          />
+        )}
       </div>
 
-      {/* 三大核心图库入口卡片 */}
-      <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+      {/* 核心图库入口卡片 */}
+      <div className={`grid gap-3 sm:gap-4 ${series.libraries.body ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}>
         <Link
           to="/$series/poses"
           params={{ series: series.id }}
@@ -137,6 +148,30 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
             ))}
           </div>
         </Link>
+
+        {series.libraries.body && (
+          <Link
+            to="/$series/body"
+            params={{ series: series.id }}
+            className="group flex flex-col justify-between rounded-[20px] bg-muted p-4 transition hover:bg-muted/70"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">🧍 身材参考库</h2>
+              <Badge variant="secondary">{visibleBody.length.toLocaleString('zh-CN')}</Badge>
+            </div>
+            <div className="mt-3 grid grid-cols-4 gap-1.5">
+              {visibleBody.slice(0, 4).map((item) => (
+                <img
+                  key={item.id}
+                  src={referenceImageUrl(item.缩略图)}
+                  alt={item.体型名称}
+                  loading="lazy"
+                  className="aspect-3/4 w-full rounded-lg bg-background object-cover"
+                />
+              ))}
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* 热门人像 Top10 速选区 */}

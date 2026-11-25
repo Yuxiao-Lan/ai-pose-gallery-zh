@@ -75,6 +75,22 @@ export interface PortraitItem {
   检索: string
 }
 
+export interface BodyItem {
+  source?: 'upload'
+  id: string
+  体型分类: string
+  体型名称: string
+  视角: string
+  标签?: string[]
+  身高?: number
+  体重?: number
+  体脂?: number
+  缩略图: string
+  原图: string
+  检索: string
+  敏感?: boolean
+}
+
 export interface ExtraReferenceImage {
   role?: 'character_sheet'
   id: string

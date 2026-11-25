@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import type { CostumeItem, PortraitItem, PoseGroup, PoseItem } from '@/types/gallery'
+import type { BodyItem, CostumeItem, PortraitItem, PoseGroup, PoseItem } from '@/types/gallery'
 import { SERIES, type SeriesId } from '@/lib/series'
 
 export const ANGLES = ['正面', '俯视', '仰视', '侧面', '斜侧'] as const
@@ -119,6 +119,18 @@ export function portraitsQueryFor(series: SeriesId) {
     queryFn: async () => {
       if (!def.libraries.portraits) return []
       return fetchItems<PortraitItem>(`/${def.libraries.portraits}`, series, '人像数据')
+    },
+  })
+}
+
+export function bodyQueryFor(series: SeriesId) {
+  const def = SERIES[series]
+  return queryOptions({
+    queryKey: ['gallery', series, 'body'],
+    staleTime: Infinity,
+    queryFn: async () => {
+      if (!def.libraries.body) return []
+      return fetchItems<BodyItem>(`/${def.libraries.body}`, series, '身材数据')
     },
   })
 }

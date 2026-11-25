@@ -3,6 +3,7 @@ import {
   KeyRoundIcon,
   LayoutDashboardIcon,
   PersonStandingIcon,
+  RulerIcon,
   ShirtIcon,
   SparklesIcon,
   UserRoundIcon,
@@ -15,6 +16,7 @@ export type NavTarget =
   | { to: '/$series/poses'; params: { series: SeriesId } }
   | { to: '/$series/costumes'; params: { series: SeriesId } }
   | { to: '/$series/portraits'; params: { series: SeriesId } }
+  | { to: '/$series/body'; params: { series: SeriesId } }
   | { to: '/studio' }
   | { to: '/settings' }
   | { to: '/guide' }
@@ -46,6 +48,9 @@ export function navGroupsFor(series: SeriesDef): NavGroup[] {
         { title: '动作姿势库', target: { to: '/$series/poses', params: { series: series.id } }, icon: PersonStandingIcon },
         { title: '服装穿搭库', target: { to: '/$series/costumes', params: { series: series.id } }, icon: ShirtIcon },
         { title: '人像颜值库', target: { to: '/$series/portraits', params: { series: series.id } }, icon: UserRoundIcon },
+        ...(series.libraries.body
+          ? [{ title: '身材参考库', target: { to: '/$series/body' as const, params: { series: series.id } }, icon: RulerIcon }]
+          : []),
       ],
     },
     {

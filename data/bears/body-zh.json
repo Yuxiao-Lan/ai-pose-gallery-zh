@@ -1,0 +1,98 @@
+[
+ {
+  "id": "bear-body-sample-01",
+  "体型分类": "壮熊",
+  "体型名称": "宽肩厚背",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 171,
+  "体重": 83,
+  "体脂": 23,
+  "缩略图": "thumbs/bears/body/bear-body-sample-01.webp",
+  "原图": "img/bears/body/bear-body-sample-01.webp",
+  "检索": "bear-body-sample-01 壮熊 宽肩厚背 正面 示例",
+  "敏感": false
+ },
+ {
+  "id": "bear-body-sample-02",
+  "体型分类": "肉熊",
+  "体型名称": "圆润结实",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 172,
+  "体重": 86,
+  "体脂": 24,
+  "缩略图": "thumbs/bears/body/bear-body-sample-02.webp",
+  "原图": "img/bears/body/bear-body-sample-02.webp",
+  "检索": "bear-body-sample-02 肉熊 圆润结实 正面 示例",
+  "敏感": false
+ },
+ {
+  "id": "bear-body-sample-03",
+  "体型分类": "胖熊",
+  "体型名称": "腹部圆润",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 173,
+  "体重": 89,
+  "体脂": 25,
+  "缩略图": "thumbs/bears/body/bear-body-sample-03.webp",
+  "原图": "img/bears/body/bear-body-sample-03.webp",
+  "检索": "bear-body-sample-03 胖熊 腹部圆润 正面 示例",
+  "敏感": false
+ },
+ {
+  "id": "bear-body-sample-04",
+  "体型分类": "毛熊",
+  "体型名称": "体毛浓密",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 174,
+  "体重": 92,
+  "体脂": 26,
+  "缩略图": "thumbs/bears/body/bear-body-sample-04.webp",
+  "原图": "img/bears/body/bear-body-sample-04.webp",
+  "检索": "bear-body-sample-04 毛熊 体毛浓密 正面 示例",
+  "敏感": false
+ },
+ {
+  "id": "bear-body-sample-05",
+  "体型分类": "熊叔",
+  "体型名称": "成熟气质",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 175,
+  "体重": 95,
+  "体脂": 27,
+  "缩略图": "thumbs/bears/body/bear-body-sample-05.webp",
+  "原图": "img/bears/body/bear-body-sample-05.webp",
+  "检索": "bear-body-sample-05 熊叔 成熟气质 正面 示例",
+  "敏感": false
+ },
+ {
+  "id": "bear-body-sample-06",
+  "体型分类": "小熊",
+  "体型名称": "年轻清瘦",
+  "视角": "正面",
+  "标签": [
+   "示例"
+  ],
+  "身高": 176,
+  "体重": 98,
+  "体脂": 28,
+  "缩略图": "thumbs/bears/body/bear-body-sample-06.webp",
+  "原图": "img/bears/body/bear-body-sample-06.webp",
+  "检索": "bear-body-sample-06 小熊 年轻清瘦 正面 示例",
+  "敏感": false
+ }
+]

@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
+import { bodyQueryFor, costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
 import { SeriesDashboard } from '@/components/gallery/SeriesDashboard'
 import { getSeries } from '@/lib/series'
 
@@ -15,6 +15,7 @@ export const Route = createFileRoute('/$series/')({
       context.queryClient.ensureQueryData(posesQueryFor(series.id)),
       context.queryClient.ensureQueryData(costumesQueryFor(series.id)),
       context.queryClient.ensureQueryData(portraitsQueryFor(series.id)),
+      context.queryClient.ensureQueryData(bodyQueryFor(series.id)),
     ])
   },
   component: SeriesIndexRoute,

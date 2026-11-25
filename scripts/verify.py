@@ -12,6 +12,78 @@ JPEG = b"\xff\xd8\xff"
 PNG = b"\x89PNG\r\n\x1a\n"
 WEBP = b"RIFF"
 
+CATALOG_FIELDS = {
+    "pose": ("体系", "分类", "姿势名称", "角度", "缩略图", "原图"),
+    "costume": ("分类", "服装名称", "缩略图", "预览图", "原图"),
+    "portrait": ("分区", "发型名称", "缩略图", "原图"),
+    "body": ("体型分类", "体型名称", "视角", "缩略图", "原图"),
+}
+
+
+def verify_catalogs():
+    """校验 Web/ComfyUI 实际读取的 *-zh.json：字段、全局 ID、敏感布尔值、本地资产。"""
+    data_dir = os.path.join(ROOT, "data")
+    files = [
+        ("pose", os.path.join(data_dir, "pose-zh.json")),
+        ("costume", os.path.join(data_dir, "costume-zh.json")),
+        ("costume", os.path.join(data_dir, "costume-anime-zh.json")),
+        ("costume", os.path.join(data_dir, "costume-gia-anime-zh.json")),
+        ("costume", os.path.join(data_dir, "costume-shisei-zh.json")),
+        ("portrait", os.path.join(data_dir, "portrait-zh.json")),
+        ("pose", os.path.join(data_dir, "bears/pose-zh.json")),
+        ("costume", os.path.join(data_dir, "bears/costume-zh.json")),
+        ("portrait", os.path.join(data_dir, "bears/portrait-zh.json")),
+        ("body", os.path.join(data_dir, "bears/body-zh.json")),
+    ]
+    seen = {}
+    errors = []
+    total = 0
+    for kind, path in files:
+        if not os.path.exists(path):
+            errors.append((path, "缺失目录文件"))
+            continue
+        with open(path, encoding="utf-8") as fh:
+            rows = json.load(fh)
+        if not isinstance(rows, list):
+            errors.append((path, "顶层不是数组"))
+            continue
+        for row in rows:
+            total += 1
+            item_id = row.get("id")
+            if not item_id or not isinstance(item_id, str) or any(ch.isspace() for ch in item_id):
+                errors.append((path, f"非法 id: {item_id!r}"))
+                continue
+            if item_id in seen:
+                errors.append((path, f"id 重复: {item_id}（另见 {seen[item_id]}）"))
+            else:
+                seen[item_id] = os.path.relpath(path, ROOT)
+            for field in CATALOG_FIELDS[kind]:
+                if not row.get(field):
+                    errors.append((f"{path}:{item_id}", f"缺少字段 {field}"))
+            if not isinstance(row.get("敏感"), bool):
+                errors.append((f"{path}:{item_id}", "敏感 必须是布尔值"))
+            assets = [row.get("缩略图"), row.get("原图"), row.get("预览图")]
+            for view in row.get("views") or []:
+                assets.extend([view.get("缩略图"), view.get("预览图"), view.get("原图")])
+            for asset in assets:
+                if not asset or not isinstance(asset, str):
+                    continue
+                if asset.startswith(("http://", "https://", "data:")):
+                    continue
+                local = os.path.join(ROOT, asset.lstrip("/"))
+                if not os.path.isfile(local):
+                    errors.append((f"{path}:{item_id}", f"资产不存在 {asset}"))
+    print(f"目录条目 {total}，唯一 ID {len(seen)}，异常 {len(errors)}")
+    for location, why in errors[:40]:
+        print(" ", location, why)
+    if len(errors) > 40:
+        print(f" ... 其余 {len(errors) - 40} 条省略")
+    return 1 if errors else 0
+
+
+if "--catalogs" in sys.argv[1:]:
+    sys.exit(verify_catalogs())
+
 checks = []
 
 # 1. Pose

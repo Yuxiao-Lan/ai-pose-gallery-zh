@@ -5,10 +5,11 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 用法：
-  bash scripts/build.sh [--allow-branch <name>] [--allow-untracked]
+  bash scripts/build.sh [--allow-branch <name>] [--allow-untracked] [--skip-verify]
       生产：默认仅允许 main，拒绝未跟踪的 data/、thumbs/、img/ 文件；成功后发布到 dist/
       --allow-branch <name>  将本次生产发布要求的分支改为 <name>
       --allow-untracked      允许本次生产发布包含未跟踪的资产
+      --skip-verify          跳过 scripts/verify.py --catalogs 目录校验（仅应急）
   bash scripts/build.sh --test
       测试：构建 dist-test.next/，类型检查通过后替换 dist-test/，不复制静态资产
   bash scripts/build.sh -h|--help
@@ -24,6 +25,7 @@ usage_error() {
 out_dir=dist.next
 required_branch=
 allow_untracked=false
+skip_verify=false
 case "${1:-}" in
   --test)
     [[ $# == 1 ]] || usage_error
@@ -47,6 +49,11 @@ while [[ $# -gt 0 ]]; do
     --allow-untracked)
       [[ "$allow_untracked" == false ]] || usage_error
       allow_untracked=true
+      shift
+      ;;
+    --skip-verify)
+      [[ "$skip_verify" == false ]] || usage_error
+      skip_verify=true
       shift
       ;;
     *) usage_error ;;
@@ -107,6 +114,10 @@ fi
 # Vite 的路由插件先生成路由树，新增路由才能通过类型检查。
 npx vite build --outDir "$out_dir" --emptyOutDir
 npx tsc -b
+
+if [[ "$out_dir" == dist.next && "$skip_verify" == false ]]; then
+  python3 scripts/verify.py --catalogs
+fi
 
 if [[ "$out_dir" == dist-test.next ]]; then
   rm -rf dist-test
