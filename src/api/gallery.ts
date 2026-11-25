@@ -15,36 +15,19 @@ export const PREFERRED_POSE_LINE_ORDER = [
   '双人・互动',
 ] as const
 
-export const NSFW_POSE_SYSTEMS = new Set(['全身单人・性感系', '双人缠绵'])
-export const NSFW_COSTUME_CATEGORIES = new Set(['内衣・睡衣', '性感穿搭'])
-
-export function isNsfwPoseSystem(system: string): boolean {
-  return NSFW_POSE_SYSTEMS.has(system)
-}
-
-export function isNsfwPose(item: PoseItem | PoseGroup): boolean {
-  const sys = '体系' in item ? item.体系 : item.system
-  return NSFW_POSE_SYSTEMS.has(sys)
-}
-
-export function isNsfwCostumeCategory(category: string): boolean {
-  return NSFW_COSTUME_CATEGORIES.has(category)
-}
-
-export function isNsfwCostume(item: CostumeItem): boolean {
-  return Boolean(item.敏感) || NSFW_COSTUME_CATEGORIES.has(item.分类)
+export function sortPoseLines(lines: Iterable<string>): string[] {
+  return [...new Set(lines)].sort((a, b) => {
+    const ia = PREFERRED_POSE_LINE_ORDER.indexOf(a as (typeof PREFERRED_POSE_LINE_ORDER)[number])
+    const ib = PREFERRED_POSE_LINE_ORDER.indexOf(b as (typeof PREFERRED_POSE_LINE_ORDER)[number])
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+  })
 }
 
 export function buildPoseGroups(
   items: PoseItem[],
   angles: readonly string[] = ANGLES
 ): { items: PoseItem[]; groups: PoseGroup[]; lines: string[] } {
-  const rawLines = [...new Set(items.map((x) => x.体系))]
-  const lines = rawLines.sort((a, b) => {
-    const ia = PREFERRED_POSE_LINE_ORDER.indexOf(a as (typeof PREFERRED_POSE_LINE_ORDER)[number])
-    const ib = PREFERRED_POSE_LINE_ORDER.indexOf(b as (typeof PREFERRED_POSE_LINE_ORDER)[number])
-    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
-  })
+  const lines = sortPoseLines(items.map((x) => x.体系))
   const groupMap = new Map<string, PoseGroup>()
   const groups: PoseGroup[] = []
 

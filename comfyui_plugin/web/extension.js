@@ -106,13 +106,9 @@ function setWidgetValue(node, name, value) {
   app.graph.setDirtyCanvas(true, true);
 }
 
-const NSFW_POSE_SYSTEMS = new Set(["全身单人・性感系", "双人缠绵"]);
-const NSFW_COSTUME_CATEGORIES = new Set(["内衣・睡衣", "性感穿搭"]);
-
-function isItemNsfw(lib, item) {
-  if (lib === "pose") return NSFW_POSE_SYSTEMS.has(item["体系"]);
-  if (lib === "costume") return Boolean(item["敏感"]) || NSFW_COSTUME_CATEGORIES.has(item["分类"]);
-  return false;
+// 逐条敏感标记：data/*-zh.json 中的 `敏感` 字段，缺省视为非敏感。
+function isItemNsfw(_lib, item) {
+  return item["敏感"] === true;
 }
 
 class PoseAtlasModal {
@@ -270,7 +266,7 @@ class PoseAtlasModal {
     const sfwBtn = backdrop.querySelector("#pca-sfw-btn");
     sfwBtn.addEventListener("click", () => {
       if (this.safeMode) {
-        if (!window.confirm("是否关闭安全模式并显示 18+ 敏感参考分类（性感姿势、双人缠绵、内衣穿搭）？请确认您已年满 18 周岁。")) {
+        if (!window.confirm("是否关闭安全模式并显示逐条标记的 18+ 敏感参考？请确认您已年满 18 周岁。")) {
           return;
         }
         this.safeMode = false;

@@ -3,7 +3,7 @@ import { DEFAULT_API_CONFIG, mergeStoredConfig, shouldEnableProxyByDefault } fro
 import { migrateActiveTask, taskHistoryId, type ActiveTask } from '@/lib/generationTask'
 import { createContext, type ReactNode, useContext, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { toast } from '@/lib/notifications'
-import { isNsfwCostume, isNsfwPose } from '@/api/gallery'
+import { isNsfwCostume, isNsfwPose, isNsfwPortrait } from '@/lib/nsfw'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -271,7 +271,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       requestUnlockNsfw()
     } else {
       setSafeMode(true)
-      toast.success('已开启安全模式（已隐藏 18+ 敏感分类）')
+      toast.success('已开启安全模式（已隐藏 18+ 敏感内容）')
     }
   }
 
@@ -373,7 +373,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const randomizeRecipe = (pools: { portraits?: PortraitItem[]; costumes?: CostumeItem[]; poses?: PoseItem[] }) => {
     const posePool = safeMode ? (pools.poses || []).filter((p) => !isNsfwPose(p)) : pools.poses || []
     const costumePool = (pools.costumes || []).filter((c) => !c.source && c.一级分类 !== '二次元' && (!safeMode || !isNsfwCostume(c)))
-    const portraitPool = pools.portraits || []
+    const portraitPool = safeMode ? (pools.portraits || []).filter((p) => !isNsfwPortrait(p)) : pools.portraits || []
 
     setRecipe((prev) => ({
       ...prev,
@@ -400,6 +400,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       ...pools,
       costumes: (pools.costumes || []).filter((item) => !current.safeMode || !isNsfwCostume(item)),
       poses: (pools.poses || []).filter((item) => !current.safeMode || !isNsfwPose(item)),
+      portraits: (pools.portraits || []).filter((item) => !current.safeMode || !isNsfwPortrait(item)),
     }, current.poseDepthMode)
     if (!next) {
       toast.info(scope === 'similar' ? '没有其他同类素材，可切到“全部”再试' : '没有其他可用素材')
@@ -669,7 +670,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
             <AlertDialogTitle>🔞 年龄确认与免责声明（NSFW 18+）</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2 text-left leading-relaxed">
               <span className="block">
-                关闭「安全模式 (SFW)」后，图库将显示包含成人向艺术参考的敏感分类：
+                关闭「安全模式 (SFW)」后，图库将显示逐条标记的 18+ 成人向艺术参考：
               </span>
               <span className="block rounded-lg bg-muted p-2.5 text-xs text-foreground">
                 • <strong>动作姿势库</strong>：全身单人・性感系（399 张）、双人缠绵（275 张）
@@ -677,7 +678,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
               </span>
               <span className="block text-xs">
                 <strong>免责声明</strong>：
-                <br />1. <strong>年龄限制</strong>：未满 18 周岁的未成年人严禁关闭安全模式或浏览上述敏感分类。
+                <br />1. <strong>年龄限制</strong>：未满 18 周岁的未成年人严禁关闭安全模式或浏览上述敏感内容。
                 <br />2. <strong>来源说明</strong>：原有图鉴素材来自 ギア（@giaaibusi）；二次元服装来自 たき AI · CharaDB，适用独立来源条件，禁止真人、未成年人用途及图片再分发，首次使用须确认。
                 <br />3. <strong>合法使用</strong>：本工具与素材<strong>仅供 AI 绘画学习与合法艺术创作使用，严禁用于任何违法违规、色情传播或侵害他人肖像权（如未经授权的真人换脸）等用途</strong>，使用者须自行承担一切法律责任。
               </span>

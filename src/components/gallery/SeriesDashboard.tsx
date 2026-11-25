@@ -10,7 +10,8 @@ import {
   ShirtIcon,
   UserRoundIcon,
 } from 'lucide-react'
-import { costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
+import { buildPoseGroups, costumesQueryFor, portraitsQueryFor, posesQueryFor } from '@/api/gallery'
+import { isSensitive } from '@/lib/nsfw'
 import { PageHeader } from '@/components/common/PageHeader'
 import { StatCard } from '@/components/common/StatCard'
 import { Badge } from '@/components/ui/badge'
@@ -24,10 +25,14 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
   const { data: posesData } = useSuspenseQuery(posesQueryFor(series.id))
   const { data: costumes } = useSuspenseQuery(costumesQueryFor(series.id))
   const { data: portraits } = useSuspenseQuery(portraitsQueryFor(series.id))
-  const { recipe, togglePortrait } = useStudio()
+  const { recipe, togglePortrait, safeMode } = useStudio()
 
-  const topPortraits = series.allowRecipe ? portraits.filter((p) => p.热门).slice(0, 10) : []
-  const totalImages = posesData.items.length + costumes.length + portraits.length
+  const visiblePoses = safeMode ? posesData.items.filter((item) => !isSensitive(item)) : posesData.items
+  const visibleGroups = safeMode ? buildPoseGroups(visiblePoses, series.angles).groups : posesData.groups
+  const visibleCostumes = safeMode ? costumes.filter((item) => !isSensitive(item)) : costumes
+  const visiblePortraits = safeMode ? portraits.filter((item) => !isSensitive(item)) : portraits
+  const topPortraits = series.allowRecipe ? visiblePortraits.filter((p) => p.热门).slice(0, 10) : []
+  const totalImages = visiblePoses.length + visibleCostumes.length + visiblePortraits.length
   const realisticCostumes = costumes.filter((item) => (item.一级分类 || '现实') === '现实').length
   const animeCostumes = costumes.length - realisticCostumes
   const hairCount = new Set(portraits.map((item) => item.发型名称).filter(Boolean)).size
@@ -47,19 +52,19 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         />
         <StatCard
           title="动作姿势 (Pose)"
-          value={`${posesData.groups.length} 组`}
+          value={`${visibleGroups.length} 组`}
           icon={<PersonStandingIcon />}
-          desc={`${posesData.items.length} 张 · ${posesHaveDepth ? '白模/深度' : '本地参考图'}`}
+          desc={`${visiblePoses.length} 张 · ${posesHaveDepth ? '白模/深度' : '本地参考图'}`}
         />
         <StatCard
           title="服装穿搭 (Costume)"
-          value={`${costumes.length.toLocaleString('zh-CN')} 套`}
+          value={`${visibleCostumes.length.toLocaleString('zh-CN')} 套`}
           icon={<ShirtIcon />}
           desc={series.showProvenance ? `现实 ${realisticCostumes} · 二次元 ${animeCostumes}` : '本地收录'}
         />
         <StatCard
           title="人像颜值 (Portrait)"
-          value={`${portraits.length.toLocaleString('zh-CN')} 张`}
+          value={`${visiblePortraits.length.toLocaleString('zh-CN')} 张`}
           icon={<UserRoundIcon />}
           desc={series.showProvenance ? `CC0 协议 · ${hairCount} 款发型` : `${hairCount} 款发型`}
         />
@@ -74,10 +79,10 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">🕺 动作姿势库</h2>
-            <Badge variant="secondary">{posesData.items.length.toLocaleString('zh-CN')}</Badge>
+            <Badge variant="secondary">{visiblePoses.length.toLocaleString('zh-CN')}</Badge>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">
-            {posesData.groups.slice(0, 4).map((g) => (
+            {visibleGroups.slice(0, 4).map((g) => (
               <img
                 key={g.key}
                 src={`/${g.order[0].缩略图}`}
@@ -96,10 +101,10 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">👗 服装穿搭库</h2>
-            <Badge variant="secondary">{costumes.length.toLocaleString('zh-CN')}</Badge>
+            <Badge variant="secondary">{visibleCostumes.length.toLocaleString('zh-CN')}</Badge>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">
-            {costumes.slice(0, 4).map((c) => (
+            {visibleCostumes.slice(0, 4).map((c) => (
               <img
                 key={c.id}
                 src={referenceImageUrl(c.缩略图)}
@@ -118,10 +123,10 @@ export function SeriesDashboard({ series }: { series: SeriesDef }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">👤 人像颜值库</h2>
-            <Badge variant="secondary">{portraits.length.toLocaleString('zh-CN')}</Badge>
+            <Badge variant="secondary">{visiblePortraits.length.toLocaleString('zh-CN')}</Badge>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">
-            {portraits.slice(0, 4).map((p) => (
+            {visiblePortraits.slice(0, 4).map((p) => (
               <img
                 key={p.id}
                 src={`/${p.缩略图}`}

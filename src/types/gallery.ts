@@ -4,6 +4,8 @@ export interface PoseItem {
   useDepth?: boolean
   /** 该条目是否提供深度图资产；缺省时按旧约定（存在 depth 目录）处理 */
   hasDepth?: boolean
+  /** 逐条敏感标记（18+），缺省视为否 */
+  敏感?: boolean
   id: string
   体系: string
   姿势编号: string
@@ -56,6 +58,8 @@ export interface CostumeItem {
 
 export interface PortraitItem {
   source?: 'upload'
+  /** 逐条敏感标记（18+），缺省视为否 */
+  敏感?: boolean
   id: string
   分区: string
   发长: string

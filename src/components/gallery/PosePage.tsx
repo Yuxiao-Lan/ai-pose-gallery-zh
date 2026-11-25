@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from '@/lib/notifications'
-import { isNsfwPose, isNsfwPoseSystem, posesQueryFor } from '@/api/gallery'
+import { buildPoseGroups, posesQueryFor, sortPoseLines } from '@/api/gallery'
+import { isSensitive } from '@/lib/nsfw'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Badge } from '@/components/ui/badge'
@@ -40,21 +41,19 @@ export function PosePage({ series }: { series: SeriesDef }) {
   const [hoverAngles, setHoverAngles] = useState<Record<string, string>>({})
   const [viewer, setViewer] = useState<{ groupIndex: number; item: PoseItem } | null>(null)
 
-  const activeLine = safeMode && line && isNsfwPoseSystem(line) ? '' : line
-
   const baseItems = useMemo(
-    () => (safeMode ? data.items.filter((x) => !isNsfwPose(x)) : data.items),
+    () => (safeMode ? data.items.filter((x) => !isSensitive(x)) : data.items),
     [data.items, safeMode]
   )
-  const baseGroups = useMemo(
-    () => (safeMode ? data.groups.filter((g) => !isNsfwPose(g)) : data.groups),
-    [data.groups, safeMode]
-  )
-  const visibleLines = useMemo(
-    () => (safeMode ? data.lines.filter((l) => !isNsfwPoseSystem(l)) : data.lines),
-    [data.lines, safeMode]
-  )
+  // 分组必须由过滤后的条目重建：混合分组里只保留可见角度，避免灯箱/角度条漏出敏感图。
+  const baseGroups = useMemo(() => buildPoseGroups(baseItems, series.angles).groups, [baseItems, series.angles])
+  const visibleLines = useMemo(() => sortPoseLines(baseItems.map((x) => x.体系)), [baseItems])
+  const activeLine = line && visibleLines.includes(line) ? line : ''
   const hiddenNsfwCount = data.items.length - baseItems.length
+
+  useEffect(() => {
+    setViewer(null)
+  }, [safeMode])
 
   const categories = useMemo(() => {
     const filtered = baseItems.filter((x) => !activeLine || x.体系 === activeLine)
@@ -205,8 +204,8 @@ export function PosePage({ series }: { series: SeriesDef }) {
           全部 ({baseItems.length})
         </button>
         {visibleLines.map((l) => {
-          const cnt = data.items.filter((x) => x.体系 === l).length
-          const isNsfw = isNsfwPoseSystem(l)
+          const cnt = baseItems.filter((x) => x.体系 === l).length
+          const isNsfw = data.items.some((x) => x.体系 === l && isSensitive(x))
           return (
             <button
               key={l}
@@ -230,14 +229,15 @@ export function PosePage({ series }: { series: SeriesDef }) {
             type="button"
             onClick={() =>
               requestUnlockNsfw(() => {
-                setLine('全身单人・性感系')
+                setLine('')
                 setCategory('all')
+                setAngle('')
                 setShown(60)
               })
             }
             className="shrink-0 rounded-full border border-dashed border-rose-500/40 bg-rose-500/5 px-3.5 py-1.5 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-500/10 dark:text-rose-400"
           >
-            🔒 解锁 18+ 性感/双人系 ({hiddenNsfwCount})
+            🔒 解锁 18+ 敏感内容 ({hiddenNsfwCount})
           </button>
         )}
       </div>

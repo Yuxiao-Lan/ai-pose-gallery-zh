@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from '@/lib/notifications'
-import { costumesQueryFor, isNsfwCostume, isNsfwCostumeCategory } from '@/api/gallery'
+import { costumesQueryFor } from '@/api/gallery'
+import { isNsfwCostume, isSensitive } from '@/lib/nsfw'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Badge } from '@/components/ui/badge'
@@ -70,8 +71,6 @@ export function CostumePage({ series }: { series: SeriesDef }) {
   const [shown, setShown] = useState(60)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
 
-  const activeCategory = safeMode && category && isNsfwCostumeCategory(category) ? '' : category
-
   const baseCostumes = useMemo(
     () => costumes.filter((x) => (source === 'all' || costumeSourceId(x) === source) && (kind === '全部' || (x.一级分类 || '现实') === kind) && (!safeMode || !isNsfwCostume(x))),
     [costumes, safeMode, kind, source]
@@ -83,6 +82,12 @@ export function CostumePage({ series }: { series: SeriesDef }) {
     () => [...new Set(baseCostumes.map((x) => x.分类))],
     [baseCostumes]
   )
+  // 安全模式切换或分类被隐藏后，活动分类必须回到「全部」，否则列表会空。
+  const activeCategory = category && categories.includes(category) ? category : ''
+
+  useEffect(() => {
+    setViewerIndex(null)
+  }, [safeMode])
 
   const allTags = useMemo(() => {
     const subset = baseCostumes.filter((x) => !activeCategory || x.分类 === activeCategory)
@@ -160,7 +165,7 @@ export function CostumePage({ series }: { series: SeriesDef }) {
         </button>
         {categories.map((c) => {
           const cnt = baseCostumes.filter((x) => x.分类 === c).length
-          const isNsfw = isNsfwCostumeCategory(c)
+          const isNsfw = costumes.some((x) => x.分类 === c && isSensitive(x))
           return (
             <button
               key={c}

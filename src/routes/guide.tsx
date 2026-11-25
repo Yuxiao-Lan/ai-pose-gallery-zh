@@ -16,7 +16,7 @@ function GuidePage() {
       <Section title="角色合成流程" className="@lg/section:grid-cols-3">
         <div className="rounded-2xl bg-background p-4">
           <Badge>1. 人像</Badge>
-          <h3 className="mt-2 text-sm font-semibold">人像颜值库 (1,499)</h3>
+          <h3 className="mt-2 text-sm font-semibold">人像颜值库</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             挑选五官与发型参考，或在合成台直接上传自定义人像图，锁定角色面部特征。
           </p>
@@ -24,7 +24,7 @@ function GuidePage() {
 
         <div className="rounded-2xl bg-background p-4">
           <Badge>2. 服装</Badge>
-          <h3 className="mt-2 text-sm font-semibold">服装穿搭库 (3,224)</h3>
+          <h3 className="mt-2 text-sm font-semibold">服装穿搭库</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             按全部 / 现实 / 二次元及来源、分类、标签挑选；含ギア写实 1,407 套、Shisei 中国历代 57 套（227 视角）、ギア动漫 1,320 套与 CharaDB 二次元 440 套。
           </p>
@@ -32,7 +32,7 @@ function GuidePage() {
 
         <div className="rounded-2xl bg-background p-4">
           <Badge>3. 姿势 + 附图</Badge>
-          <h3 className="mt-2 text-sm font-semibold">动作姿势库 (1,439)</h3>
+          <h3 className="mt-2 text-sm font-semibold">动作姿势库</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             挑选 5 视角 3D 素体白模或深度图（Depth），结合云端 API 或本地 ComfyUI 一键生成角色立绘。
           </p>

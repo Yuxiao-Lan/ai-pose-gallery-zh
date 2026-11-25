@@ -24,14 +24,19 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useStudio } from '@/store/studioStore'
+import { isNsfwPortrait } from '@/lib/nsfw'
 import type { SeriesDef } from '@/lib/series'
 
 
 const HAIR_ORDER = ['光头', '短发', '中发', '中长发', '长发'] as const
 
 export function PortraitPage({ series }: { series: SeriesDef }) {
-  const { data: portraits } = useSuspenseQuery(portraitsQueryFor(series.id))
-  const { recipe, togglePortrait } = useStudio()
+  const { data: allPortraits } = useSuspenseQuery(portraitsQueryFor(series.id))
+  const { recipe, togglePortrait, safeMode } = useStudio()
+  const portraits = useMemo(
+    () => (safeMode ? allPortraits.filter((item) => !isNsfwPortrait(item)) : allPortraits),
+    [allPortraits, safeMode]
+  )
 
   const [section, setSection] = useState('')
   const [hair, setHair] = useState('')
@@ -40,6 +45,10 @@ export function PortraitPage({ series }: { series: SeriesDef }) {
   const [query, setQuery] = useState('')
   const [shown, setShown] = useState(60)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    setViewerIndex(null)
+  }, [safeMode])
 
   const hairs = useMemo(() => {
     const present = [...new Set(portraits.map((p) => p.发长).filter(Boolean))]
