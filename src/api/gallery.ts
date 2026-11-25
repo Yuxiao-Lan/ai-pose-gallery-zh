@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { CostumeItem, PortraitItem, PoseGroup, PoseItem } from '@/types/gallery'
+import { SERIES, type SeriesId } from '@/lib/series'
 
 export const ANGLES = ['正面', '俯视', '仰视', '侧面', '斜侧'] as const
 
@@ -8,6 +9,10 @@ export const PREFERRED_POSE_LINE_ORDER = [
   '上半身单人',
   '全身单人・性感系',
   '双人缠绵',
+  '全身・单人',
+  '半身・单人',
+  '局部・特写',
+  '双人・互动',
 ] as const
 
 export const NSFW_POSE_SYSTEMS = new Set(['全身单人・性感系', '双人缠绵'])
@@ -30,7 +35,10 @@ export function isNsfwCostume(item: CostumeItem): boolean {
   return Boolean(item.敏感) || NSFW_COSTUME_CATEGORIES.has(item.分类)
 }
 
-export function buildPoseGroups(items: PoseItem[]): { items: PoseItem[]; groups: PoseGroup[]; lines: string[] } {
+export function buildPoseGroups(
+  items: PoseItem[],
+  angles: readonly string[] = ANGLES
+): { items: PoseItem[]; groups: PoseGroup[]; lines: string[] } {
   const rawLines = [...new Set(items.map((x) => x.体系))]
   const lines = rawLines.sort((a, b) => {
     const ia = PREFERRED_POSE_LINE_ORDER.indexOf(a as (typeof PREFERRED_POSE_LINE_ORDER)[number])
@@ -65,7 +73,7 @@ export function buildPoseGroups(items: PoseItem[]): { items: PoseItem[]; groups:
 
   groups.sort((a, b) => lines.indexOf(a.system) - lines.indexOf(b.system) || String(a.number).localeCompare(String(b.number)))
   for (const group of groups) {
-    group.order = ANGLES.map((a) => group.angles[a]).filter(Boolean)
+    group.order = angles.map((a) => group.angles[a]).filter(Boolean)
     for (const item of group.items) {
       if (!group.order.includes(item)) group.order.push(item)
     }
@@ -74,36 +82,65 @@ export function buildPoseGroups(items: PoseItem[]): { items: PoseItem[]; groups:
   return { items, groups, lines }
 }
 
-export const posesQuery = queryOptions({
-  queryKey: ['gallery', 'poses'],
-  staleTime: Infinity,
-  queryFn: async () => {
-    const res = await fetch('/data/pose-zh.json')
-    if (!res.ok) throw new Error(`加载姿势数据失败: HTTP ${res.status}`)
-    const data = (await res.json()) as PoseItem[]
-    return buildPoseGroups(data)
-  },
-})
+/**
+ * 读取图库 JSON。
+ * 胖熊系列的目录允许缺失或为空数组（视为空库）；通用系列缺失或格式错误必须报错，
+ * 避免把「数据坏了」静默显示成「没有数据」。
+ */
+async function fetchItems<T>(url: string, series: SeriesId, label: string): Promise<T[]> {
+  const res = await fetch(url)
+  const allowMissing = series !== 'general'
+  if (res.status === 404) {
+    if (allowMissing) return []
+    throw new Error(`加载${label}失败: HTTP 404 (${url})`)
+  }
+  if (!res.ok) throw new Error(`加载${label}失败: HTTP ${res.status} (${url})`)
+  const data = await res.json()
+  if (!Array.isArray(data)) throw new Error(`${label}数据格式错误：期望数组 (${url})`)
+  return data as T[]
+}
 
-export const costumesQuery = queryOptions({
-  queryKey: ['gallery', 'costumes'],
-  staleTime: Infinity,
-  queryFn: async () => {
-    const lists = await Promise.all(['/data/costume-zh.json', '/data/costume-anime-zh.json', '/data/costume-gia-anime-zh.json', '/data/costume-shisei-zh.json'].map(async (url) => {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`加载服装数据失败: HTTP ${res.status}`)
-      return (await res.json()) as CostumeItem[]
-    }))
-    return lists.flat()
-  },
-})
+export function posesQueryFor(series: SeriesId) {
+  const def = SERIES[series]
+  return queryOptions({
+    queryKey: ['gallery', series, 'poses'],
+    staleTime: Infinity,
+    queryFn: async () => {
+      if (!def.libraries.poses) return buildPoseGroups([], def.angles)
+      const data = await fetchItems<PoseItem>(`/${def.libraries.poses}`, series, '姿势数据')
+      return buildPoseGroups(data, def.angles)
+    },
+  })
+}
 
-export const portraitsQuery = queryOptions({
-  queryKey: ['gallery', 'portraits'],
-  staleTime: Infinity,
-  queryFn: async () => {
-    const res = await fetch('/data/portrait-zh.json')
-    if (!res.ok) throw new Error(`加载人像数据失败: HTTP ${res.status}`)
-    return (await res.json()) as PortraitItem[]
-  },
-})
+export function costumesQueryFor(series: SeriesId) {
+  const def = SERIES[series]
+  return queryOptions({
+    queryKey: ['gallery', series, 'costumes'],
+    staleTime: Infinity,
+    queryFn: async () => {
+      if (!def.libraries.costumes) return []
+      const lists = await Promise.all(
+        def.libraries.costumes.map((path) => fetchItems<CostumeItem>(`/${path}`, series, '服装数据'))
+      )
+      return lists.flat()
+    },
+  })
+}
+
+export function portraitsQueryFor(series: SeriesId) {
+  const def = SERIES[series]
+  return queryOptions({
+    queryKey: ['gallery', series, 'portraits'],
+    staleTime: Infinity,
+    queryFn: async () => {
+      if (!def.libraries.portraits) return []
+      return fetchItems<PortraitItem>(`/${def.libraries.portraits}`, series, '人像数据')
+    },
+  })
+}
+
+/** 通用系列查询：合成台与全局随机仍只用这一套。 */
+export const posesQuery = posesQueryFor('general')
+export const costumesQuery = costumesQueryFor('general')
+export const portraitsQuery = portraitsQueryFor('general')

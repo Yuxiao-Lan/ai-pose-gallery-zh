@@ -18,7 +18,7 @@ export function RecipeDock() {
   const count = [recipe.portrait, recipe.costume, recipe.pose].filter(Boolean).length + extraCount + workflowImages.length
 
   // 在合成台、设置页、指南页隐藏底部悬浮栏，避免与页面内组件重复
-  if (pathname.startsWith('/studio') || pathname.startsWith('/settings') || pathname.startsWith('/guide')) {
+  if (pathname.startsWith('/studio') || pathname.startsWith('/settings') || pathname.startsWith('/guide') || pathname.startsWith('/bears')) {
     return null
   }
 
@@ -67,7 +67,10 @@ export function RecipeDock() {
                 </button>
               </>
             ) : (
-              <Link to="/portraits" className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Link
+                to="/$series/portraits"
+                params={{ series: 'general' }}
+                className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
                 <div className="flex h-8 w-7 shrink-0 items-center justify-center rounded-md bg-background/80 sm:h-10 sm:w-8">
                   <UserRoundIcon className="size-3.5" />
                 </div>
@@ -98,7 +101,10 @@ export function RecipeDock() {
                 </button>
               </>
             ) : (
-              <Link to="/costumes" className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Link
+                to="/$series/costumes"
+                params={{ series: 'general' }}
+                className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
                 <div className="flex h-8 w-7 shrink-0 items-center justify-center rounded-md bg-background/80 sm:h-10 sm:w-8">
                   <ShirtIcon className="size-3.5" />
                 </div>
@@ -140,7 +146,10 @@ export function RecipeDock() {
                 </button>
               </>
             ) : (
-              <Link to="/poses" className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Link
+                to="/$series/poses"
+                params={{ series: 'general' }}
+                className="flex min-w-0 max-w-full flex-1 items-center gap-1.5 text-muted-foreground hover:text-foreground">
                 <div className="flex h-8 w-7 shrink-0 items-center justify-center rounded-md bg-background/80 sm:h-10 sm:w-8">
                   <PersonStandingIcon className="size-3.5" />
                 </div>

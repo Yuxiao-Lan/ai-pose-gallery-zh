@@ -4,9 +4,17 @@ export function referenceImageUrl(src: string): string {
   return /^(data:|blob:|https?:\/\/|\/)/i.test(src) ? src : `/${src}`
 }
 
+/** 条目是否具备深度图资产；胖熊图库不生成 depth，需显式声明。 */
+export function canUseDepth(pose: PoseItem): boolean {
+  if (pose.source === 'upload') return false
+  if (pose.hasDepth === false) return false
+  if (pose.hasDepth === true) return true
+  return !pose.缩略图.startsWith('thumbs/bears/')
+}
+
 export function poseThumbPath(pose: PoseItem, useDepth = Boolean(pose.useDepth)): string {
   const raw = pose.缩略图
-  if (pose.source === 'upload' || !useDepth || /^(data:|blob:|https?:\/\/)/i.test(raw)) return raw
+  if (!useDepth || !canUseDepth(pose) || /^(data:|blob:|https?:\/\/)/i.test(raw)) return raw
   const clean = raw.replace(/^\/+/, '')
   if (clean.startsWith('thumbs/depth/')) return raw
   if (clean.startsWith('thumbs/')) {
@@ -17,7 +25,7 @@ export function poseThumbPath(pose: PoseItem, useDepth = Boolean(pose.useDepth))
 
 export function poseImagePath(pose: PoseItem, useDepth = Boolean(pose.useDepth)): string {
   const raw = pose.原图 || pose.缩略图
-  if (pose.source === 'upload' || !useDepth || /^(data:|blob:|https?:\/\/)/i.test(raw)) return raw
+  if (!useDepth || !canUseDepth(pose) || /^(data:|blob:|https?:\/\/)/i.test(raw)) return raw
   const clean = raw.replace(/^\/+/, '')
   if (clean.startsWith('img/depth/')) return raw
   if (clean.startsWith('img/')) {

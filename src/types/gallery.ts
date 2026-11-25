@@ -2,6 +2,8 @@ export interface PoseItem {
   source?: 'upload'
   /** 是否使用灰阶深度图（Depth Map）代替素体白模 */
   useDepth?: boolean
+  /** 该条目是否提供深度图资产；缺省时按旧约定（存在 depth 目录）处理 */
+  hasDepth?: boolean
   id: string
   体系: string
   姿势编号: string

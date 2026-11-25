@@ -1,6 +1,8 @@
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate, useParams } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { ExternalLinkIcon, LayersIcon, SparklesIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Sidebar,
   SidebarContent,
@@ -14,13 +16,32 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { useStudio } from '@/store/studioStore'
-import { activeNavTo, navGroups } from './nav'
+import { DEFAULT_SERIES, SERIES, SERIES_LIST, isSeriesId, readStoredSeries, writeStoredSeries } from '@/lib/series'
+import { activeNavTo, navGroupsFor, navPath } from './nav'
 
 export function AppSidebar() {
   const pathname = useLocation({ select: (l) => l.pathname })
+  const params = useParams({ strict: false }) as { series?: string }
+  const navigate = useNavigate()
   const active = activeNavTo(pathname)
   const { recipe } = useStudio()
   const count = [recipe.portrait, recipe.costume, recipe.pose].filter(Boolean).length
+
+  const seriesId = isSeriesId(params.series) ? params.series : readStoredSeries()
+  const series = SERIES[seriesId] ?? SERIES[DEFAULT_SERIES]
+
+  useEffect(() => {
+    if (isSeriesId(params.series)) writeStoredSeries(params.series)
+  }, [params.series])
+
+  const switchSeries = (next: string) => {
+    if (!isSeriesId(next)) return
+    writeStoredSeries(next)
+    const library = pathname.split('/')[2]
+    if (library === 'costumes') navigate({ to: '/$series/costumes', params: { series: next } })
+    else if (library === 'portraits') navigate({ to: '/$series/portraits', params: { series: next } })
+    else navigate({ to: '/$series/poses', params: { series: next } })
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -34,34 +55,51 @@ export function AppSidebar() {
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate text-sm font-semibold">POSE &amp; CHARACTER</span>
-                  <span className="truncate text-xs text-muted-foreground">AI 角色三合一参考台</span>
+                  <span className="truncate text-xs text-muted-foreground">AI 角色参考台</span>
                 </div>
               </Link>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem className="mt-1 px-1 group-data-[collapsible=icon]:hidden">
+            <Select value={series.id} onValueChange={switchSeries}>
+              <SelectTrigger aria-label="切换系列" className="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SERIES_LIST.map((item) => (
+                  <SelectItem key={item.id} value={item.id} className="text-xs">
+                    {item.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
-        {navGroups.map((group) => (
+        {navGroupsFor(series).map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarMenu>
-              {group.items.map((item) => (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton asChild isActive={item.to === active} tooltip={item.title}>
-                    <Link to={item.to}>
-                      <item.icon />
-                      <span className="flex-1 truncate">{item.title}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className="ml-auto h-5 px-1.5 text-[10px] font-medium">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {group.items.map((item) => {
+                const path = navPath(item.target)
+                return (
+                  <SidebarMenuItem key={path}>
+                    <SidebarMenuButton asChild isActive={path === active} tooltip={item.title}>
+                      <Link {...item.target}>
+                        <item.icon />
+                        <span className="flex-1 truncate">{item.title}</span>
+                        {item.badge && (
+                          <Badge variant="secondary" className="ml-auto h-5 px-1.5 text-[10px] font-medium">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroup>
         ))}

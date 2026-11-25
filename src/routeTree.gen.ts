@@ -16,6 +16,10 @@ import { Route as PortraitsRouteImport } from './routes/portraits'
 import { Route as PosesRouteImport } from './routes/poses'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StudioRouteImport } from './routes/studio'
+import { Route as SeriesIndexRouteImport } from './routes/$series.index'
+import { Route as SeriesCostumesRouteImport } from './routes/$series.costumes'
+import { Route as SeriesPortraitsRouteImport } from './routes/$series.portraits'
+import { Route as SeriesPosesRouteImport } from './routes/$series.poses'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +56,26 @@ const StudioRoute = StudioRouteImport.update({
   path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeriesIndexRoute = SeriesIndexRouteImport.update({
+  id: '/$series/',
+  path: '/$series/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesCostumesRoute = SeriesCostumesRouteImport.update({
+  id: '/$series/costumes',
+  path: '/$series/costumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesPortraitsRoute = SeriesPortraitsRouteImport.update({
+  id: '/$series/portraits',
+  path: '/$series/portraits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesPosesRoute = SeriesPosesRouteImport.update({
+  id: '/$series/poses',
+  path: '/$series/poses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +85,10 @@ export interface FileRoutesByFullPath {
   '/poses': typeof PosesRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
+  '/$series/costumes': typeof SeriesCostumesRoute
+  '/$series/portraits': typeof SeriesPortraitsRoute
+  '/$series/poses': typeof SeriesPosesRoute
+  '/$series/': typeof SeriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +98,10 @@ export interface FileRoutesByTo {
   '/poses': typeof PosesRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
+  '/$series/costumes': typeof SeriesCostumesRoute
+  '/$series/portraits': typeof SeriesPortraitsRoute
+  '/$series/poses': typeof SeriesPosesRoute
+  '/$series': typeof SeriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +112,10 @@ export interface FileRoutesById {
   '/poses': typeof PosesRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
+  '/$series/costumes': typeof SeriesCostumesRoute
+  '/$series/portraits': typeof SeriesPortraitsRoute
+  '/$series/poses': typeof SeriesPosesRoute
+  '/$series/': typeof SeriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +127,10 @@ export interface FileRouteTypes {
     | '/poses'
     | '/settings'
     | '/studio'
+    | '/$series/costumes'
+    | '/$series/portraits'
+    | '/$series/poses'
+    | '/$series/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +140,10 @@ export interface FileRouteTypes {
     | '/poses'
     | '/settings'
     | '/studio'
+    | '/$series/costumes'
+    | '/$series/portraits'
+    | '/$series/poses'
+    | '/$series'
   id:
     | '__root__'
     | '/'
@@ -109,6 +153,10 @@ export interface FileRouteTypes {
     | '/poses'
     | '/settings'
     | '/studio'
+    | '/$series/costumes'
+    | '/$series/portraits'
+    | '/$series/poses'
+    | '/$series/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +167,10 @@ export interface RootRouteChildren {
   PosesRoute: typeof PosesRoute
   SettingsRoute: typeof SettingsRoute
   StudioRoute: typeof StudioRoute
+  SeriesCostumesRoute: typeof SeriesCostumesRoute
+  SeriesPortraitsRoute: typeof SeriesPortraitsRoute
+  SeriesPosesRoute: typeof SeriesPosesRoute
+  SeriesIndexRoute: typeof SeriesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +224,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$series/': {
+      id: '/$series/'
+      path: '/$series'
+      fullPath: '/$series/'
+      preLoaderRoute: typeof SeriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$series/costumes': {
+      id: '/$series/costumes'
+      path: '/$series/costumes'
+      fullPath: '/$series/costumes'
+      preLoaderRoute: typeof SeriesCostumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$series/portraits': {
+      id: '/$series/portraits'
+      path: '/$series/portraits'
+      fullPath: '/$series/portraits'
+      preLoaderRoute: typeof SeriesPortraitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$series/poses': {
+      id: '/$series/poses'
+      path: '/$series/poses'
+      fullPath: '/$series/poses'
+      preLoaderRoute: typeof SeriesPosesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +263,10 @@ const rootRouteChildren: RootRouteChildren = {
   PosesRoute: PosesRoute,
   SettingsRoute: SettingsRoute,
   StudioRoute: StudioRoute,
+  SeriesCostumesRoute: SeriesCostumesRoute,
+  SeriesPortraitsRoute: SeriesPortraitsRoute,
+  SeriesPosesRoute: SeriesPosesRoute,
+  SeriesIndexRoute: SeriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

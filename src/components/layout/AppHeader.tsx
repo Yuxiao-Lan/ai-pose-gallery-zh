@@ -1,4 +1,4 @@
-import { Link, useMatches } from '@tanstack/react-router'
+import { Link, useMatches, useParams } from '@tanstack/react-router'
 import { DicesIcon, ShieldCheckIcon, SparklesIcon } from 'lucide-react'
 import { Fragment } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,6 +19,8 @@ import { useStudio } from '@/store/studioStore'
 
 export function AppHeader() {
   const { recipe, randomizeRecipe, safeMode, toggleSafeMode } = useStudio()
+  const params = useParams({ strict: false }) as { series?: string }
+  const canRandomize = params.series !== 'bears'
   const qc = useQueryClient()
   const crumbs = useMatches({
     select: (matches) =>
@@ -79,10 +81,12 @@ export function AppHeader() {
           <span className="hidden @2xl/header:inline">{safeMode ? '安全模式 (SFW)' : '18+ 完整模式'}</span>
           <span className="@2xl/header:hidden">{safeMode ? 'SFW' : '18+'}</span>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleRandom} className="hidden @3xl/header:inline-flex">
-          <DicesIcon className="size-3.5" />
-          随机捏人
-        </Button>
+        {canRandomize && (
+          <Button variant="outline" size="sm" onClick={handleRandom} className="hidden @3xl/header:inline-flex">
+            <DicesIcon className="size-3.5" />
+            随机捏人
+          </Button>
+        )}
         <Button size="sm" asChild>
           <Link to="/studio" aria-label={`AI 合成台，已选 ${selectedCount} 项参考图`}>
             <SparklesIcon className="size-3.5" />

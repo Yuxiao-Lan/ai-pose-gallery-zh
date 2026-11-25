@@ -527,7 +527,8 @@ function StudioPage() {
                 ) : (
                   <>
                     <Link
-                      to="/portraits"
+                      to="/$series/portraits"
+                      params={{ series: 'general' }}
                       className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                     >
                       <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -588,7 +589,8 @@ function StudioPage() {
                 ) : (
                   <>
                     <Link
-                      to="/costumes"
+                      to="/$series/costumes"
+                      params={{ series: 'general' }}
                       className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                     >
                       <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -678,7 +680,8 @@ function StudioPage() {
                 ) : (
                   <>
                     <Link
-                      to="/poses"
+                      to="/$series/poses"
+                      params={{ series: 'general' }}
                       className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                     >
                       <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
